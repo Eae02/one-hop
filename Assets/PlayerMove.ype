@@ -1,0 +1,14 @@
+texture: Tex/Particles.png
+lifeTime: 0.5
+endOpacity: 0
+opacity: 1
+size: [2, 4]
+emissionRate: 10
+direction: [70, 120]
+speed: 4
+spawnRadius: 5
+textureAreas:
+  - x: 0
+    y: 0
+    w: 2
+    h: 2
