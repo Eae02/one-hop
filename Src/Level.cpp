@@ -255,12 +255,12 @@ void level::Update(float dt)
 			}
 		}
 		
-		if (IsButtonDown(Button::R))
+		if (IsBindingDown("restart"))
 		{
 			if (canStartReset)
 			{
 				resetTime += dt;
-				if (!WasButtonDown(Button::R))
+				if (!WasBindingDown("restart"))
 					camera.Shake(3.0f, RESET_HOLD_TIME);
 				if (resetTime > RESET_HOLD_TIME)
 				{
@@ -283,7 +283,7 @@ void level::Update(float dt)
 		currentSignTexture = nullptr;
 	}
 	
-	if (IsButtonDown(Button::Escape) && !WasButtonDown(Button::Escape))
+	if (IsBindingDownNow("esc"))
 	{
 		if (currentSignTexture != nullptr)
 		{
@@ -301,26 +301,18 @@ void level::Update(float dt)
 		platform.Update(dt);
 	}
 	
-	bool isLookingAround = !isLevelCompleted && IsButtonDown(Button::Z);
+	bool isLookingAround = !isLevelCompleted && IsBindingDown("pan");
 	
 	player.Update(dt, !isLevelCompleted && currentSignTexture == nullptr && !isLookingAround);
 	
 	if (isLookingAround)
 	{
-		glm::vec2 targetAccel;
-		if (IsButtonDown(Button::W))
-			targetAccel.y += 1;
-		else if (IsButtonDown(Button::S))
-			targetAccel.y -= 1;
-		else
-			cameraTargetVel.y -= cameraTargetVel.y * std::min(100 * dt, 1.0f);
+		glm::vec2 targetAccel(AxisValueLR(), AxisValueUD());
 		
-		if (IsButtonDown(Button::A))
-			targetAccel.x -= 1;
-		else if (IsButtonDown(Button::D))
-			targetAccel.x += 1;
-		else
+		if (std::abs(targetAccel.x) < 0.01f)
 			cameraTargetVel.x -= cameraTargetVel.x * std::min(100 * dt, 1.0f);
+		if (std::abs(targetAccel.y) < 0.01f)
+			cameraTargetVel.y -= cameraTargetVel.y * std::min(100 * dt, 1.0f);
 		
 		targetAccel *= 500;
 		cameraTargetVel += targetAccel * dt;
@@ -346,7 +338,7 @@ void level::Update(float dt)
 				readTextShowProgress = std::min(readTextShowProgress + dt / READ_SHOW_ANIM_TIME, 1.0f);
 				anySign = true;
 				
-				if (IsButtonDown(Button::E) && !WasButtonDown(Button::E))
+				if (IsBindingDownNow("act"))
 				{
 					currentSignTexture = &GetAsset<Texture2D>(sign.second);
 				}

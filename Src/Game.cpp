@@ -7,6 +7,13 @@ struct GMTK19Game : Game
 {
 	GMTK19Game()
 	{
+		SetInputBinding("act", { Button::E, Button::CtrlrX });
+		SetInputBinding("jump", { Button::Space, Button::CtrlrA });
+		SetInputBinding("climb", { Button::LeftShift, Button::RightShift, Button::CtrlrLeftShoulder, Button::CtrlrRightShoulder });
+		SetInputBinding("restart", { Button::R, Button::CtrlrY });
+		SetInputBinding("esc", { Button::Escape, Button::CtrlrStart });
+		SetInputBinding("pan", { Button::Z, Button::CtrlrB });
+		
 		save::Init("eae", "onehop");
 		level::InitSave();
 		

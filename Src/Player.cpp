@@ -178,19 +178,13 @@ void Player::Update(float dt, bool controllable)
 	jm::UpdateListener(m_position);
 }
 
-inline bool IsShiftDown()
-{
-	return IsButtonDown(Button::LeftShift) || IsButtonDown(Button::RightShift);
-}
-
 void Player::UpdateNormal(float dt)
 {
-	const bool moveLeft = IsButtonDown(Button::A);
-	const bool moveRight = IsButtonDown(Button::D);
+	const float moveLR = AxisValueLR();
 	
 	float accelX = 0;
 	
-	if (moveRight == moveLeft)
+	if (std::abs(moveLR) < 0.01f)
 	{
 		if (m_velocity.x < 0)
 		{
@@ -205,15 +199,10 @@ void Player::UpdateNormal(float dt)
 				m_velocity.x = 0.0f;
 		}
 	}
-	else if (moveLeft)
-	{
-		accelX -= ACCEL_AMOUNT;
-		m_facingLeft = true;
-	}
 	else
 	{
-		accelX += ACCEL_AMOUNT;
-		m_facingLeft = false;
+		accelX += moveLR * ACCEL_AMOUNT;
+		m_facingLeft = moveLR < 0;
 	}
 	
 	if ((accelX < 0) != (m_velocity.x < 0))
@@ -229,7 +218,7 @@ void Player::UpdateNormal(float dt)
 	}
 	
 	//Updates vertical velocity
-	if (IsButtonDown(Button::Space) && !WasButtonDown(Button::Space) && m_onGround)
+	if (IsBindingDownNow("jump") && m_onGround)
 	{
 		if (MaybeJump())
 		{
@@ -261,7 +250,7 @@ void Player::UpdateNormal(float dt)
 	}
 	
 	//Starts climbing
-	if (IsShiftDown() && !level::IntersectsSolid(Rect().Inflated(-2)))
+	if (IsBindingDown("climb") && !level::IntersectsSolid(Rect().Inflated(-2)))
 	{
 		if (level::IntersectsSolid(ClimbLeftRectangle(0, 0.3f, 0.5f)))
 		{
@@ -373,7 +362,7 @@ void Player::UpdateClimb(float dt)
 		return;
 	}
 	
-	if (!IsShiftDown())
+	if (!IsBindingDown("climb"))
 	{
 		m_climbHoldDirection = 0;
 	}
@@ -428,7 +417,7 @@ void Player::UpdateClimb(float dt)
 		return;
 	}
 	
-	if (IsButtonDown(Button::Space) && !WasButtonDown(Button::Space))
+	if (IsBindingDownNow("jump"))
 	{
 		if (MaybeJump())
 		{
@@ -441,11 +430,10 @@ void Player::UpdateClimb(float dt)
 	m_velocity.x = 0;
 	m_onGround = false;
 	
-	const bool moveDown = IsButtonDown(Button::S);
-	const bool moveUp = IsButtonDown(Button::W);
+	const float moveUD = AxisValueUD();
 	
 	float accelY = 0;
-	if (moveUp == moveDown)
+	if (std::abs(moveUD) < 0.1f)
 	{
 		if (m_velocity.y < 0)
 		{
@@ -460,13 +448,9 @@ void Player::UpdateClimb(float dt)
 				m_velocity.y = 0.0f;
 		}
 	}
-	else if (moveDown)
-	{
-		accelY -= CLIMB_ACCEL_AMOUNT;
-	}
 	else
 	{
-		accelY += CLIMB_ACCEL_AMOUNT;
+		accelY += CLIMB_ACCEL_AMOUNT * moveUD;
 	}
 	
 	if ((accelY < 0) != (m_velocity.y < 0))
